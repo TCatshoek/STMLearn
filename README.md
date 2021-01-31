@@ -3,7 +3,7 @@
 STMLearn is a python library which implements several active state machine learning algorithms.
 This library is currently under active development, and things may change at any time. If you want to use this for anything important you would probably be better off with [LearnLib](https://github.com/LearnLib/learnlib)  :)
 
-###Learning algorithms:
+### Learning algorithms:
 at the moment L* and TTT are supported for DFAs and Mealy machines.
 
 | Algorithm | DFA | Mealy machine |
@@ -11,7 +11,7 @@ at the moment L* and TTT are supported for DFAs and Mealy machines.
 | L*        | ✔️ | ✔ |️
 | TTT       | ✔️ | ✔ |
 
-###Equivalence checking methods:
+### Equivalence checking methods:
 
 The following equivalence checking methods are available, or will be soon:
 
