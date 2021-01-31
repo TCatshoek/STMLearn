@@ -25,9 +25,6 @@ s3.add_edge('b', s3)
 
 sm = DFA(s1, [s3])
 
-# Or use a regex to define the state machine
-# sm = RegexMachine('(ab)+')
-
 # We are using the brute force equivalence checker
 eqc = BFEquivalenceChecker(sm, max_depth=4)
 
