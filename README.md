@@ -1,7 +1,7 @@
 # STMLearn
 
 STMLearn is a python library which implements several active state machine learning algorithms.
-This library is currently under active development, and things may change at any time. If you want to use this for anything important you would probably be better off with [LearnLib](https://github.com/LearnLib/learnlib)  :)
+This library is currently under active development, and things may change at any time. If you want to use this for anything important right now you would probably be better off with [LearnLib](https://github.com/LearnLib/learnlib)  :)
 
 ### Learning algorithms:
 at the moment L* and TTT are supported for DFAs and Mealy machines.
@@ -40,7 +40,7 @@ hyp = learner.run()
 # Draw the learned dfa
 hyp.render_graph(tempfile.mktemp('.gv'))
 ```
-For the regular expression `(bb)*(aa)*(bb)*` the following dfa is learned:
+For the SUL described by the regular expression `(bb)*(aa)*(bb)*` the following dfa is learned:
 ![simple dfa](https://i.imgur.com/vlqQcCH.png)
 
 
