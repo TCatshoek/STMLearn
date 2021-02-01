@@ -7,13 +7,15 @@ from queue import Queue
 from dataclasses import dataclass
 from bisect import bisect_left
 
-from stmlearn.suls import MealyMachine
+from stmlearn.suls import MealyMachine, DFA
+
 
 
 @dataclass
 class Element:
     value: int
     block: int
+
 
 @dataclass
 class Block:
@@ -24,10 +26,12 @@ class Block:
     witness: Witness
     marks: List[List[int]]
 
+
 @dataclass
 class Witness:
     prefix: int
     suffix: Witness
+
 
 # The output funtion first takes an input symbol, then a state label, and returns the output for that transition
 class Partition:
@@ -55,7 +59,7 @@ class Partition:
     def getBlocks(self, begin: int, end: int) -> List[int]:
         ch = []
 
-        n = len (self.elements)
+        n = len(self.elements)
         if end > n:
             end = n
 
@@ -89,8 +93,6 @@ class Partition:
         done = False
         while (not self.splitters.empty()) and (not done):
             splitter = self.splitters.get()
-
-            print("Splitter:", splitter)
 
             # Identify largest subblock of splitter.
             # The loop below does not check the last subblock of splitter;
@@ -166,7 +168,8 @@ class Partition:
 
                             if len(self.blocks[b].marks[cls]) == self.blocks[parent].end - self.blocks[parent].begin:
                                 # Not a real split
-                                self.blocks[b].marks[cls] = self.blocks[b].marks[cls][:0] # TODO: is this [:0] the same in python?
+                                self.blocks[b].marks[cls] = self.blocks[b].marks[cls][
+                                                            :0]  # TODO: is this [:0] the same in python?
                                 break
 
                             self.blocks[parent].witness = w
@@ -180,7 +183,8 @@ class Partition:
                             self.size += 1
 
                         sb = len(self.blocks)
-                        self.blocks.append(Block(pos, pos + len(self.blocks[b].marks[cls]), parent, None, None, [[] for _ in range(self.degree)]))
+                        self.blocks.append(Block(pos, pos + len(self.blocks[b].marks[cls]), parent, None, None,
+                                                 [[] for _ in range(self.degree)]))
 
                         # Swap the value at the current pos with val and increase pos
                         for val in self.blocks[b].marks[cls]:
@@ -196,8 +200,6 @@ class Partition:
 
                 if self.size == n:
                     done = True
-
-
 
     def refineMoore(self, f_transition: Dict[int, Dict[int, int]]):
         n = len(self.elements)
@@ -226,9 +228,10 @@ class Partition:
                             x = self.index(f[val])
                             search_n = len(self.blocks[splitter].pivots)
                             # TODO: triple check this line, might be wrong
-                            return bisect_left([ (lambda i_: self.blocks[splitter].pivots[i_] > x)(i_) for i_ in range(search_n)], True)
+                            return bisect_left(
+                                [(lambda i_: self.blocks[splitter].pivots[i_] > x)(i_) for i_ in range(search_n)], True)
 
-                        parent = self.split(b, len(self.blocks[splitter].pivots)+1, class_func, w)
+                        parent = self.split(b, len(self.blocks[splitter].pivots) + 1, class_func, w)
                         if parent >= 0:
                             self.splitters.put(parent)
 
@@ -278,12 +281,13 @@ class Partition:
 
             sb = b
 
-            if not first:   # Make a new block
+            if not first:  # Make a new block
                 sb = len(self.blocks)
-                self.blocks.append(Block(pos, pos + len(refinement[cls_]), parent, None, None, [[] for _ in range(self.degree)]))
+                self.blocks.append(
+                    Block(pos, pos + len(refinement[cls_]), parent, None, None, [[] for _ in range(self.degree)]))
                 self.blocks[parent].pivots.append(pos)
                 self.size += 1
-            else:           # Modify interval b == sb
+            else:  # Modify interval b == sb
                 self.blocks[sb].end = pos + len(refinement[cls_])
                 first = False
 
@@ -307,7 +311,15 @@ class Partition:
 
         return witnesses
 
-def partition_mealy(fsm: MealyMachine):
+
+def get_distinguishing_set(fsm: Union[MealyMachine, DFA], method="Hopcroft"):
+    if isinstance(fsm, MealyMachine):
+        return partition_mealy(fsm, method)
+    if isinstance(fsm, DFA):
+        raise NotImplementedError
+
+
+def partition_mealy(fsm: MealyMachine, method):
     states = fsm.get_states()
 
     # Map states to ints
@@ -321,12 +333,12 @@ def partition_mealy(fsm: MealyMachine):
     output_num_map = dict()
 
     # Create transition and output functions
-    t_func = dict() # Maps inputs to maps of state -> next state
-    o_func = dict() # Maps inputs to maps of state -> output
+    t_func = dict()  # Maps inputs to maps of state -> next state
+    o_func = dict()  # Maps inputs to maps of state -> output
 
     for inp in fsm.get_alphabet():
-        t_func_sub = dict() # The state -> next state map for the current input
-        o_func_sub = dict() # The state -> output map for the current input
+        t_func_sub = dict()  # The state -> next state map for the current input
+        o_func_sub = dict()  # The state -> output map for the current input
         for state in states:
             next_state, output = state.next(inp)
 
@@ -346,8 +358,12 @@ def partition_mealy(fsm: MealyMachine):
 
     # Construct the partition
     p = Partition(len(states), len(output_num_map), o_func)
-    p.refineHopcroft(t_func)
-    #p.refineMoore(t_func)
+    if method == "Hopcroft":
+        p.refineHopcroft(t_func)
+    elif method == "Moore":
+        p.refineMoore(t_func)
+    else:
+        raise Exception("unknown minimization method")
 
     witnesses = p.getWitnesses()
 
@@ -358,7 +374,10 @@ def partition_mealy(fsm: MealyMachine):
     for witness in witnesses.keys():
         translated_witnesses.append(tuple([num_input_map[x] for x in witness]))
 
-    return translated_witnesses
+    tmp = set(translated_witnesses)
+    tmp.remove(tuple())
+    return tmp
+
 
 def preimage(f: Dict[int, int], n: int) -> Callable[int, List[int]]:
     p = [[] for _ in range(n)]
@@ -372,23 +391,27 @@ def preimage(f: Dict[int, int], n: int) -> Callable[int, List[int]]:
 
     return preimage_func
 
+
 if __name__ == "__main__":
     from stmlearn.suls import MealyMachine, MealyState
     import tempfile
+    from stmlearn.util import load_mealy_dot
 
-    # Set up an example mealy machine
-    s1 = MealyState('1')
-    s2 = MealyState('2')
-    s3 = MealyState('3')
+    # # Set up an example mealy machine
+    # s1 = MealyState('1')
+    # s2 = MealyState('2')
+    # s3 = MealyState('3')
+    #
+    # s1.add_edge('a', 'nice', s2)
+    # s1.add_edge('b', 'B', s1)
+    # s2.add_edge('a', 'nice', s3)
+    # s2.add_edge('b', 'back', s1)
+    # s3.add_edge('a', 'A', s3)
+    # s3.add_edge('b', 'back', s1)
+    #
+    # mm = MealyMachine(s1)
+    # mm.render_graph(tempfile.mktemp('.gv'))
 
-    s1.add_edge('a', 'nice', s2)
-    s1.add_edge('b', 'B', s1)
-    s2.add_edge('a', 'nice', s3)
-    s2.add_edge('b', 'back', s1)
-    s3.add_edge('a', 'A', s3)
-    s3.add_edge('b', 'back', s1)
+    mm = load_mealy_dot("/home/tom/projects/STMLearn/tests/partition/m54.dot")
 
-    mm = MealyMachine(s1)
-    mm.render_graph(tempfile.mktemp('.gv'))
-
-    partition_mealy(mm)
+    get_distinguishing_set(mm)
