@@ -7,31 +7,7 @@ from stmlearn.util import load_mealy_dot
 from zipfile import ZipFile
 from shutil import rmtree
 
-def _check_distinguishing_set(fsm, dset):
-    outputs = _get_dset_outputs(fsm, dset)
-
-    if len(set(outputs.values())) < len(outputs):
-        print("Dset outputs not unique!")
-        print("Dset: ", dset)
-        print("Outputs:", list(outputs.values()))
-        return False
-    else:
-        print('Dset succes!', len(outputs), 'states,', len(set(outputs)), 'unique outputs')
-        print('Dset size:', len(dset))
-        return True
-
-
-def _get_dset_outputs(fsm, dset):
-    states = fsm.get_states()
-    outputs = {}
-    for state in states:
-        mm = MealyMachine(state)
-        out = []
-        for dseq in dset:
-            out.append(mm.process_input(dseq))
-            mm.reset()
-        outputs[state] = tuple(out.copy())
-    return outputs
+from stmlearn.util.distinguishingset import check_distinguishing_set
 
 
 class SimpleTestPartition(unittest.TestCase):
@@ -52,11 +28,11 @@ class SimpleTestPartition(unittest.TestCase):
 
     def test_simple_hopcroft(self):
         dset = get_distinguishing_set(self.mm, method="Hopcroft")
-        self.assertEqual(set([('a',), ('b',)]), dset)
+        self.assertEqual({('a',), ('b',)}, dset)
 
     def test_simple_moore(self):
         dset = get_distinguishing_set(self.mm, method="Moore")
-        self.assertEqual(set([('a',), ('b',)]), dset)
+        self.assertEqual({('a',), ('b',)}, dset)
 
 
 class SimpleSingleTestPartition(unittest.TestCase):
@@ -126,49 +102,56 @@ class RersIndustrialTestPartitionSmall(unittest.TestCase):
     def tearDown(self):
         rmtree('testcases')
 
+    def test_deterministic(self):
+        for i in range(10):
+            dset1 = get_distinguishing_set(self.m54, method="Moore")
+            dset2 = get_distinguishing_set(self.m54, method="Moore")
+            self.assertEqual(dset1, dset2)
+
     def test_m54_hopcroft(self):
         dset = get_distinguishing_set(self.m54, method="Hopcroft")
-        self.assertTrue(_check_distinguishing_set(self.m54, dset))
+        self.assertTrue(check_distinguishing_set(self.m54, dset))
 
     def test_m54_moore(self):
         dset = get_distinguishing_set(self.m54, method="Moore")
-        self.assertTrue(_check_distinguishing_set(self.m54, dset))
+        self.assertTrue(check_distinguishing_set(self.m54, dset))
 
     def test_m164_hopcroft(self):
         dset = get_distinguishing_set(self.m164, method="Hopcroft")
-        self.assertTrue(_check_distinguishing_set(self.m164, dset))
+        self.assertTrue(check_distinguishing_set(self.m164, dset))
 
     def test_m164_moore(self):
         dset = get_distinguishing_set(self.m164, method="Moore")
-        self.assertTrue(_check_distinguishing_set(self.m164, dset))
+        self.assertTrue(check_distinguishing_set(self.m164, dset))
 
     def test_m22_hopcroft(self):
         dset = get_distinguishing_set(self.m22, method="Hopcroft")
-        self.assertTrue(_check_distinguishing_set(self.m22, dset))
+        self.assertTrue(check_distinguishing_set(self.m22, dset))
 
     def test_m22_moore(self):
         dset = get_distinguishing_set(self.m22, method="Moore")
-        self.assertTrue(_check_distinguishing_set(self.m22, dset))
+        self.assertTrue(check_distinguishing_set(self.m22, dset))
 
     def test_m182_hopcroft(self):
         dset = get_distinguishing_set(self.m182, method="Hopcroft")
-        self.assertTrue(_check_distinguishing_set(self.m182, dset))
+        self.assertTrue(check_distinguishing_set(self.m182, dset))
 
     def test_m182_moore(self):
         dset = get_distinguishing_set(self.m182, method="Moore")
-        self.assertTrue(_check_distinguishing_set(self.m182, dset))
+        self.assertTrue(check_distinguishing_set(self.m182, dset))
 
-# Sloooow
+
+# Takes over 5 minutes, too slow
 # class HugeRersTestPartition(unittest.TestCase):
 #     def setUp(self):
 #         # Load RERS industrial m85
-#         self.mm = load_mealy_dot("m85.dot")
+#         self.mm = load_mealy_dot("/home/tom/projects/lstar/rers/industrial/m85.dot")
 #         print(len(self.mm.get_states()), "States - good luck")
 #
 #     def test_m85_hopcroft(self):
 #         dset = get_distinguishing_set(self.mm, method="Hopcroft")
-#         self.assertTrue(_check_distinguishing_set(self.mm, dset))
+#         self.assertTrue(check_distinguishing_set(self.mm, dset))
 #
 #     def test_m85_moore(self):
 #         dset = get_distinguishing_set(self.mm, method="Moore")
-#         self.assertTrue(_check_distinguishing_set(self.mm, dset))
+#         self.assertTrue(check_distinguishing_set(self.mm, dset))

@@ -2,13 +2,14 @@
 # All credits to Rick Smetsers
 
 from __future__ import annotations
+
+from copy import copy
 from typing import Dict, List, Union, Callable
 from queue import Queue
 from dataclasses import dataclass
 from bisect import bisect_left
 
 from stmlearn.suls import MealyMachine, DFA
-
 
 
 @dataclass
@@ -144,14 +145,14 @@ class Partition:
 
                 # Move the marked values to subblocks.
                 for b in markblocks:
-                    parent = None
+                    parent: int = 0
                     pos = self.blocks[b].end - count[b]
                     if pos == self.blocks[b].begin:
                         # the implicit child is empty
                         parent = b
                     else:
                         parent = len(self.blocks)
-                        self.blocks.append(self.blocks[b])
+                        self.blocks.append(copy(self.blocks[b])) # Gotcha, copy bug >_>
                         self.blocks[parent].pivots = [pos]
 
                         self.blocks[b].end = pos
@@ -160,7 +161,7 @@ class Partition:
                     first = True
                     for cls in range(len(self.blocks[splitter].pivots) + 1):
 
-                        if cls == largest or self.blocks[b].marks[cls] == None or len(self.blocks[b].marks[cls]) == 0:
+                        if cls == largest or self.blocks[b].marks[cls] is None or len(self.blocks[b].marks[cls]) == 0:
                             continue
 
                         if first:
@@ -168,8 +169,7 @@ class Partition:
 
                             if len(self.blocks[b].marks[cls]) == self.blocks[parent].end - self.blocks[parent].begin:
                                 # Not a real split
-                                self.blocks[b].marks[cls] = self.blocks[b].marks[cls][
-                                                            :0]  # TODO: is this [:0] the same in python?
+                                self.blocks[b].marks[cls] = [] #self.blocks[b].marks[cls][:0]  # TODO: is this [:0] the same in python?
                                 break
 
                             self.blocks[parent].witness = w
@@ -179,6 +179,10 @@ class Partition:
                                 self.size += 1
 
                         else:
+                            # Apparently go automatically creates an array if you append to nil?
+                            # What a headache lol
+                            if self.blocks[parent].pivots is None:
+                                self.blocks[parent].pivots = []
                             self.blocks[parent].pivots.append(pos)
                             self.size += 1
 
@@ -196,7 +200,7 @@ class Partition:
                             self.indices[other] = i
                             pos += 1
 
-                        self.blocks[b].marks[cls] = self.blocks[b].marks[cls][:0]
+                        self.blocks[b].marks[cls] = [] #self.blocks[b].marks[cls][:0]
 
                 if self.size == n:
                     done = True
@@ -229,7 +233,8 @@ class Partition:
                             search_n = len(self.blocks[splitter].pivots)
                             # TODO: triple check this line, might be wrong
                             return bisect_left(
-                                [(lambda i_: self.blocks[splitter].pivots[i_] > x)(i_) for i_ in range(search_n)], True)
+                                [(lambda i_: self.blocks[splitter].pivots[i_] > x)(i_) for i_ in range(search_n)],
+                                True)
 
                         parent = self.split(b, len(self.blocks[splitter].pivots) + 1, class_func, w)
                         if parent >= 0:
@@ -246,10 +251,10 @@ class Partition:
         # we wrap it to give it a consistent interface
         def cls_get(val: int) -> int:
             if isinstance(cls, dict):
-                cls_ = cls[val]
+                cls_r = cls[val]
             else:
-                cls_ = cls(val)
-            return cls_
+                cls_r = cls(val)
+            return cls_r
 
         parent = -1
         refinement: List[List[int]] = [[] for _ in range(degree)]
@@ -320,23 +325,29 @@ def get_distinguishing_set(fsm: Union[MealyMachine, DFA], method="Hopcroft"):
 
 
 def partition_mealy(fsm: MealyMachine, method):
-    states = fsm.get_states()
+    states = sorted(fsm.get_states(), key=lambda x: int(x.name.strip('s')))
+    alphabet = sorted(fsm.get_alphabet())
 
     # Map states to ints
     state_num_map = {state: num for num, state in enumerate(states)}
 
     # Map inputs to ints
-    input_num_map = {inp: num for num, inp in enumerate(fsm.get_alphabet())}
+    input_num_map = {inp: num for num, inp in enumerate(sorted(fsm.get_alphabet()))}
 
     # Map outputs to ints
     # We do this as-we-go, is easier
     output_num_map = dict()
 
+    # FOR DEBUGGING - get the same mapping as the go code
+    # from stmlearn.util.distinguishingset._minsepseq import _run_distset
+    # dset_go, mappings_go = _run_distset("/tmp/tmp4xl31c2w.gv", return_mappings=True)
+    # output_num_map = {outp: int(num) for num, outp in mappings_go['Output'].items()}
+
     # Create transition and output functions
     t_func = dict()  # Maps inputs to maps of state -> next state
     o_func = dict()  # Maps inputs to maps of state -> output
 
-    for inp in fsm.get_alphabet():
+    for inp in alphabet:
         t_func_sub = dict()  # The state -> next state map for the current input
         o_func_sub = dict()  # The state -> output map for the current input
         for state in states:
@@ -379,7 +390,7 @@ def partition_mealy(fsm: MealyMachine, method):
     return tmp
 
 
-def preimage(f: Dict[int, int], n: int) -> Callable[int, List[int]]:
+def preimage(f: Dict[int, int], n: int) -> Callable[[int], List[int]]:
     p = [[] for _ in range(n)]
 
     for i in range(n):
@@ -396,6 +407,7 @@ if __name__ == "__main__":
     from stmlearn.suls import MealyMachine, MealyState
     import tempfile
     from stmlearn.util import load_mealy_dot
+    from stmlearn.util.distinguishingset import check_distinguishing_set
 
     # # Set up an example mealy machine
     # s1 = MealyState('1')
@@ -412,6 +424,9 @@ if __name__ == "__main__":
     # mm = MealyMachine(s1)
     # mm.render_graph(tempfile.mktemp('.gv'))
 
-    mm = load_mealy_dot("/home/tom/projects/STMLearn/tests/partition/m54.dot")
+    mm = load_mealy_dot("/home/tom/projects/STMLearn/tests/partition/rers_industrial_tests/m182.dot")
+    dset_py = get_distinguishing_set(mm, method="Hopcroft")
 
-    get_distinguishing_set(mm)
+    check_distinguishing_set(mm, dset_py)
+
+    print(sorted(dset_py))
