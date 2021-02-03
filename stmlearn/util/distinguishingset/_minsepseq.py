@@ -1,7 +1,7 @@
 import subprocess
 import tempfile
 from graphviz import Digraph
-from stmlearn.suls import MealyMachine
+from stmlearn.suls import MealyMachine, DFA
 import re
 from pathlib import Path
 from os.path import abspath
@@ -36,7 +36,6 @@ def check_distinguishing_set(fsm, dset):
         print('Dset size:', len(dset))
         print("Dset: ", dset)
         print("Outputs:", list(outputs.values()))
-        assert False
         return False
     else:
         print('Dset succes!', len(outputs), 'states,', len(set(outputs)), 'unique outputs')
@@ -48,7 +47,11 @@ def get_dset_outputs(fsm, dset):
     states = fsm.get_states()
     outputs = {}
     for state in states:
-        mm = MealyMachine(state)
+        if isinstance(fsm, MealyMachine):
+            mm = MealyMachine(state)
+        elif isinstance(fsm, DFA):
+            mm = DFA(state, fsm.accepting_states)
+
         out = []
         for dseq in dset:
             out.append(mm.process_input(dseq))
