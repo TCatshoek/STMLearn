@@ -55,12 +55,12 @@ class DFASimpleTestPartition(unittest.TestCase):
     def test_simple_hopcroft(self):
         dset = get_distinguishing_set(self.dfa, method="Hopcroft")
         self.assertTrue(check_distinguishing_set(self.dfa, dset))
-        self.assertEqual({('a',), ('λ',)}, dset)
+        self.assertEqual({('a',), tuple()}, dset)
 
     def test_simple_moore(self):
         dset = get_distinguishing_set(self.dfa, method="Moore")
         self.assertTrue(check_distinguishing_set(self.dfa, dset))
-        self.assertEqual({('a',), ('λ',)}, dset)
+        self.assertEqual({('a',), tuple()}, dset)
 
 class DFASimpleTestPartition2(unittest.TestCase):
     def setUp(self):
@@ -78,12 +78,12 @@ class DFASimpleTestPartition2(unittest.TestCase):
     def test_simple_hopcroft(self):
         dset = get_distinguishing_set(self.dfa, method="Hopcroft")
         self.assertTrue(check_distinguishing_set(self.dfa, dset))
-        self.assertEqual({('a',), ('b',)}, dset)
+        self.assertEqual({tuple(), ('b',)}, dset)
 
     def test_simple_moore(self):
         dset = get_distinguishing_set(self.dfa, method="Moore")
         self.assertTrue(check_distinguishing_set(self.dfa, dset))
-        self.assertEqual({('a',), ('b',)}, dset)
+        self.assertEqual({tuple(), ('b',)}, dset)
 
 
 

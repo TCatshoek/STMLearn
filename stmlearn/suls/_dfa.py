@@ -30,8 +30,6 @@ class DFAState:
                 raise Exception(f'{action} already defined in state {self.name}')
 
     def next(self, action):
-        if action == 'λ':  # Empty string
-            return self, self.isAccepting
         if action in self.edges.keys():
             nextstate = self.edges.get(action)
             return nextstate, nextstate.isAccepting

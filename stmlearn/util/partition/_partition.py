@@ -320,13 +320,19 @@ def get_distinguishing_set(fsm: Union[MealyMachine, DFA], method="Hopcroft"):
     if isinstance(fsm, MealyMachine):
         alphabet = list(sorted(fsm.get_alphabet()))
         tmp = set(_do_partition(fsm, alphabet, method))
-        tmp.remove(tuple())
+        tmp.remove(tuple())  # Meaningless in the case of a Mealy machine
     if isinstance(fsm, DFA):
         # In the case of a DFA, we need to consider the empty string as part of the alphabet as well
         alphabet = list(sorted(fsm.get_alphabet()))
-        alphabet.append('λ')
+        alphabet = ['λ'] + alphabet
         tmp = set(_do_partition(fsm, alphabet, method))
-        tmp.remove(tuple())
+        if ('λ',) in tmp:
+            tmp.remove(('λ',))
+        else:
+            tmp.remove(tuple())
+    else:
+        raise NotImplementedError
+
     check_ok = check_distinguishing_set(fsm, tmp)
     assert check_ok, "If this goes wrong your fsm is probably not minimal"
     return tmp
@@ -357,7 +363,11 @@ def _do_partition(fsm: Union[MealyMachine, DFA], alphabet, method):
         t_func_sub = dict()  # The state -> next state map for the current input
         o_func_sub = dict()  # The state -> output map for the current input
         for state in states:
-            next_state, output = state.next(inp)
+
+            if inp == 'λ' and isinstance(fsm, DFA): # Special case for DFAs
+                next_state, output = state, state in fsm.accepting_states
+            else:
+                next_state, output = state.next(inp)
 
             cur_id = state_num_map[state]
             next_id = state_num_map[next_state]
