@@ -1,6 +1,6 @@
 import unittest
 
-from stmlearn.suls import MealyState, MealyMachine
+from stmlearn.suls import MealyState, MealyMachine, DFAState, DFA
 from stmlearn.util.partition import get_distinguishing_set
 from stmlearn.util import load_mealy_dot
 
@@ -10,7 +10,7 @@ from shutil import rmtree
 from stmlearn.util.distinguishingset import check_distinguishing_set
 
 
-class SimpleTestPartition(unittest.TestCase):
+class MealySimpleTestPartition(unittest.TestCase):
     def setUp(self):
         # Set up an example mealy machine
         s1 = MealyState('1')
@@ -28,11 +28,39 @@ class SimpleTestPartition(unittest.TestCase):
 
     def test_simple_hopcroft(self):
         dset = get_distinguishing_set(self.mm, method="Hopcroft")
+        self.assertTrue(check_distinguishing_set(self.mm, dset))
         self.assertEqual({('a',), ('b',)}, dset)
 
     def test_simple_moore(self):
         dset = get_distinguishing_set(self.mm, method="Moore")
+        self.assertTrue(check_distinguishing_set(self.mm, dset))
         self.assertEqual({('a',), ('b',)}, dset)
+
+class DFASimpleTestPartition(unittest.TestCase):
+    def setUp(self):
+        # Set up an example mealy machine
+        s1 = DFAState('1')
+        s2 = DFAState('2')
+        s3 = DFAState('3')
+
+        s1.add_edge('a', s2)
+        s1.add_edge('b', s1)
+        s2.add_edge('a', s3)
+        s2.add_edge('b', s1)
+        s3.add_edge('a', s3)
+        s3.add_edge('b', s1)
+
+        self.dfa = DFA(s1, [s3])
+
+    def test_simple_hopcroft(self):
+        dset = get_distinguishing_set(self.dfa, method="Hopcroft")
+        self.assertTrue(check_distinguishing_set(self.dfa, dset))
+        self.assertEqual({('a', 'a'), ('a',)}, dset)
+
+    def test_simple_moore(self):
+        dset = get_distinguishing_set(self.dfa, method="Moore")
+        self.assertTrue(check_distinguishing_set(self.dfa, dset))
+        self.assertEqual({('a', 'a'), ('a',)}, dset)
 
 
 class SimpleSingleTestPartition(unittest.TestCase):
@@ -87,25 +115,36 @@ class LongSingleTestPartition(unittest.TestCase):
         self.assertEqual({('a',)}, dset)
 
 
-class RersIndustrialTestPartitionSmall(unittest.TestCase):
-    def setUp(self):
+class RersIndustrialTestPartition(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(RersIndustrialTestPartition, cls).setUpClass()
         # Unzip test cases
-        with ZipFile('rers_industrial_tests.zip', 'r') as zipfile:
+        with ZipFile('../data/rers_industrial_tests.zip', 'r') as zipfile:
             zipfile.extractall('testcases')
 
+    @classmethod
+    def tearDownClass(cls):
+        super(RersIndustrialTestPartition, cls).tearDownClass()
+        rmtree('testcases')
+
+    def setUp(self):
         # Load testcases
         self.m54 = load_mealy_dot("testcases/m54.dot")
         self.m164 = load_mealy_dot("testcases/m164.dot")
         self.m22 = load_mealy_dot("testcases/m22.dot")
         self.m182 = load_mealy_dot("testcases/m182.dot")
 
-    def tearDown(self):
-        rmtree('testcases')
-
-    def test_deterministic(self):
+    def test_deterministic_moore(self):
         for i in range(10):
             dset1 = get_distinguishing_set(self.m54, method="Moore")
             dset2 = get_distinguishing_set(self.m54, method="Moore")
+            self.assertEqual(dset1, dset2)
+
+    def test_deterministic_hopcroft(self):
+        for i in range(10):
+            dset1 = get_distinguishing_set(self.m54, method="Hopcroft")
+            dset2 = get_distinguishing_set(self.m54, method="Hopcroft")
             self.assertEqual(dset1, dset2)
 
     def test_m54_hopcroft(self):
