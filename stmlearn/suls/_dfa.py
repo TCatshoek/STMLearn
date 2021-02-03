@@ -85,8 +85,6 @@ class DFA(SUL):
         for state in states:
             actions = actions.union(set(state.edges.keys()))
 
-        print(actions)
-
         return actions
 
     # Runs the given inputs on the state machine
