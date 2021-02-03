@@ -2,13 +2,12 @@
 # All credits to Rick Smetsers
 
 from __future__ import annotations
-
 from copy import copy
 from typing import Dict, List, Union, Callable
 from queue import Queue
 from dataclasses import dataclass
 from bisect import bisect_left
-
+from stmlearn.util.distinguishingset import check_distinguishing_set
 from stmlearn.suls import MealyMachine, DFA
 
 
@@ -152,7 +151,7 @@ class Partition:
                         parent = b
                     else:
                         parent = len(self.blocks)
-                        self.blocks.append(copy(self.blocks[b])) # Gotcha, copy bug >_>
+                        self.blocks.append(copy(self.blocks[b]))  # Gotcha, copy bug >_>
                         self.blocks[parent].pivots = [pos]
 
                         self.blocks[b].end = pos
@@ -169,7 +168,7 @@ class Partition:
 
                             if len(self.blocks[b].marks[cls]) == self.blocks[parent].end - self.blocks[parent].begin:
                                 # Not a real split
-                                self.blocks[b].marks[cls] = [] #self.blocks[b].marks[cls][:0]  # TODO: is this [:0] the same in python?
+                                self.blocks[b].marks[cls] = []
                                 break
 
                             self.blocks[parent].witness = w
@@ -200,7 +199,7 @@ class Partition:
                             self.indices[other] = i
                             pos += 1
 
-                        self.blocks[b].marks[cls] = [] #self.blocks[b].marks[cls][:0]
+                        self.blocks[b].marks[cls] = []  # self.blocks[b].marks[cls][:0]
 
                 if self.size == n:
                     done = True
@@ -319,20 +318,27 @@ class Partition:
 
 def get_distinguishing_set(fsm: Union[MealyMachine, DFA], method="Hopcroft"):
     if isinstance(fsm, MealyMachine):
-        return partition_mealy(fsm, method)
+        alphabet = list(sorted(fsm.get_alphabet()))
+        tmp = set(_do_partition(fsm, alphabet, method))
+        tmp.remove(tuple())
     if isinstance(fsm, DFA):
-        raise NotImplementedError
+        # In the case of a DFA, we need to consider the empty string as part of the alphabet as well
+        alphabet = list(sorted(fsm.get_alphabet()))
+        alphabet.append('λ')
+        tmp = set(_do_partition(fsm, alphabet, method))
+        tmp.remove(tuple())
+    check_ok = check_distinguishing_set(fsm, tmp)
+    assert check_ok, "If this goes wrong your fsm is probably not minimal"
+    return tmp
 
-
-def partition_mealy(fsm: MealyMachine, method):
+def _do_partition(fsm: Union[MealyMachine, DFA], alphabet, method):
     states = sorted(fsm.get_states(), key=lambda x: int(x.name.strip('s')))
-    alphabet = sorted(fsm.get_alphabet())
 
     # Map states to ints
     state_num_map = {state: num for num, state in enumerate(states)}
 
     # Map inputs to ints
-    input_num_map = {inp: num for num, inp in enumerate(sorted(fsm.get_alphabet()))}
+    input_num_map = {inp: num for num, inp in enumerate(alphabet)}
 
     # Map outputs to ints
     # We do this as-we-go, is easier
@@ -385,9 +391,7 @@ def partition_mealy(fsm: MealyMachine, method):
     for witness in witnesses.keys():
         translated_witnesses.append(tuple([num_input_map[x] for x in witness]))
 
-    tmp = set(translated_witnesses)
-    tmp.remove(tuple())
-    return tmp
+    return translated_witnesses
 
 
 def preimage(f: Dict[int, int], n: int) -> Callable[[int], List[int]]:
@@ -401,32 +405,3 @@ def preimage(f: Dict[int, int], n: int) -> Callable[[int], List[int]]:
         return p[j]
 
     return preimage_func
-
-
-if __name__ == "__main__":
-    from stmlearn.suls import MealyMachine, MealyState
-    import tempfile
-    from stmlearn.util import load_mealy_dot
-    from stmlearn.util.distinguishingset import check_distinguishing_set
-
-    # # Set up an example mealy machine
-    # s1 = MealyState('1')
-    # s2 = MealyState('2')
-    # s3 = MealyState('3')
-    #
-    # s1.add_edge('a', 'nice', s2)
-    # s1.add_edge('b', 'B', s1)
-    # s2.add_edge('a', 'nice', s3)
-    # s2.add_edge('b', 'back', s1)
-    # s3.add_edge('a', 'A', s3)
-    # s3.add_edge('b', 'back', s1)
-    #
-    # mm = MealyMachine(s1)
-    # mm.render_graph(tempfile.mktemp('.gv'))
-
-    mm = load_mealy_dot("/home/tom/projects/STMLearn/tests/partition/rers_industrial_tests/m182.dot")
-    dset_py = get_distinguishing_set(mm, method="Hopcroft")
-
-    check_distinguishing_set(mm, dset_py)
-
-    print(sorted(dset_py))
