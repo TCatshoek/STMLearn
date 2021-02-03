@@ -1,6 +1,6 @@
 import pickle
 from abc import ABC
-from suls.sul import SUL
+from stmlearn.suls import SUL
 from pathlib import Path
 from datetime import datetime
 
@@ -20,7 +20,8 @@ class AbsCache(SUL, ABC):
         self.cachemisses = 0
         self.querycounter = 0
 
-        Path(storagepath).mkdir(parents=True, exist_ok=True)
+        if storagepath is not None:
+            Path(storagepath).mkdir(parents=True, exist_ok=True)
 
     def reset(self):
         self.sul.reset()

@@ -1,7 +1,8 @@
 import random
 
 from stmlearn.suls import MealyState, MealyMachine
-from stmlearn.util.distinguishingset import get_dset_outputs, get_distinguishing_set
+from stmlearn.util.distinguishingset import get_dset_outputs
+from stmlearn.util.partition import get_distinguishing_set
 
 
 def MakeRandomMealyMachine(n_states, A_in, A_out, minimize=True):

@@ -321,7 +321,7 @@ def get_distinguishing_set(fsm: Union[MealyMachine, DFA], method="Hopcroft"):
         alphabet = list(sorted(fsm.get_alphabet()))
         tmp = set(_do_partition(fsm, alphabet, method))
         tmp.remove(tuple())  # Meaningless in the case of a Mealy machine
-    if isinstance(fsm, DFA):
+    elif isinstance(fsm, DFA):
         # In the case of a DFA, we need to consider the empty string as part of the alphabet as well
         alphabet = list(sorted(fsm.get_alphabet()))
         alphabet = ['λ'] + alphabet

@@ -5,6 +5,7 @@ from stmlearn.learners import LStarMealyLearner, TTTMealyLearner
 from stmlearn.suls import MealyState, MealyMachine, DFAState, DFA
 from stmlearn.teachers import Teacher
 from stmlearn.util import load_mealy_dot
+from stmlearn.suls.caches.dictcache import DictCache
 
 from zipfile import ZipFile
 from shutil import rmtree
@@ -73,7 +74,7 @@ class LearnIndustrialMealy(unittest.TestCase):
 
         self.systems = {
             'm54': self.m54,
-            'm164': self.m164,
+            #'m164': self.m164,
             # 'm22':  self.m22,      # too slow
             # 'm182': self.m182      # too slow
         }
@@ -81,7 +82,6 @@ class LearnIndustrialMealy(unittest.TestCase):
     def test_lstar_wmethod(self):
         for name, system in self.systems.items():
             n_states = len(system.get_states())
-            from stmlearn.suls.caches.dictcache import DictCache
             sul = DictCache(system)
             eqc = WmethodEquivalenceChecker(sul, m=n_states)
             teacher = Teacher(sul, eqc)
@@ -97,7 +97,6 @@ class LearnIndustrialMealy(unittest.TestCase):
     def test_TTT_wmethod(self):
         for name, system in self.systems.items():
             n_states = len(system.get_states())
-            from stmlearn.suls.caches.dictcache import DictCache
             sul = DictCache(system)
             eqc = WmethodEquivalenceChecker(sul, m=n_states)
             teacher = Teacher(sul, eqc)

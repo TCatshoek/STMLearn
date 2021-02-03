@@ -6,9 +6,6 @@ import re
 from pathlib import Path
 from os.path import abspath
 
-distsetpath = Path(abspath(__file__)).parent.joinpath('distset')
-
-
 def _render(fsm: MealyMachine, filename):
     states = sorted(fsm.get_states(), key=lambda x: int(x.name.strip('s')))
     alphabet = sorted(fsm.get_alphabet())
@@ -59,49 +56,4 @@ def get_dset_outputs(fsm, dset):
         outputs[state] = tuple(out.copy())
     return outputs
 
-
-def get_distinguishing_set(fsm: MealyMachine, check=True):
-    path = tempfile.mktemp(".gv")
-    print("TMP PATH: ", path)
-
-    _render(fsm, path)
-
-    dset = set(_run_distset(path))
-    dset.remove(tuple())
-
-    if check:
-        check_distinguishing_set(fsm, dset)
-
-    return dset
-
-
-def _run_distset(path_to_dot, return_mappings=False):
-    cases = {
-        "State": {},
-        "Output": {},
-        "Input": {}
-    }
-
-    suffixes = []
-
-    result = subprocess.run([distsetpath, '-path', path_to_dot, '-strategy', '0'], capture_output=True)
-    for line in result.stdout.decode().split('\n'):
-
-        if re.match("State|Output|Input .*", line):
-            case, original, id = line.split(' ')
-            cases[case][id] = original
-
-        if re.match("Suffix .*", line):
-            suffix = []
-            line = line.replace("Suffix ", "")
-            for a in line.strip().split(" "):
-                if len(a) > 0:
-                    suffix.append(cases["Input"][a])
-
-            suffixes.append(tuple(suffix))
-
-    if return_mappings:
-        return suffixes, cases
-    else:
-        return suffixes
 

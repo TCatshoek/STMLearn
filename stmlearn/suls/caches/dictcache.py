@@ -1,6 +1,6 @@
-from suls.caches.abscache import AbsCache
+from stmlearn.suls.caches.abscache import AbsCache
 from datetime import datetime
-from suls.sul import SUL
+from stmlearn.suls import SUL
 
 # Simple cache wrapper for SULs
 # Uses a python dict as storage, fast but not very memory efficient

@@ -1,2 +1,1 @@
-from ._minsepseq import get_distinguishing_set
-from ._distinguishingset import get_dset_outputs, check_distinguishing_set
+from ._minsepseq import check_distinguishing_set, get_dset_outputs
