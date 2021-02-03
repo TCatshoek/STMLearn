@@ -10,10 +10,11 @@ distsetpath = Path(abspath(__file__)).parent.joinpath('distset')
 
 
 def _render(fsm: MealyMachine, filename):
+    states = sorted(fsm.get_states(), key=lambda x: int(x.name.strip('s')))
+    alphabet = sorted(fsm.get_alphabet())
+
     g = Digraph('G', filename=filename)
     g.attr(rankdir='LR')
-
-    states = fsm.get_states()
 
     # Add states
     for state in states:
@@ -21,24 +22,29 @@ def _render(fsm: MealyMachine, filename):
 
     # Add transitions:
     for state in states:
-        for action, (other_state, output) in state.edges.items():
+        for action, (other_state, output) in sorted(state.edges.items(), key=lambda x: x[0]):
             g.edge(state.name, other_state.name, label=f'{action}/{output}')
 
     g.save()
 
 
-def _check_distinguishing_set(fsm, dset):
-    outputs = _get_dset_outputs(fsm, dset)
+def check_distinguishing_set(fsm, dset):
+    outputs = get_dset_outputs(fsm, dset)
 
     if len(set(outputs.values())) < len(outputs):
-        print("Dset Not unique!")
+        print("Dset outputs not unique!")
+        print('Dset size:', len(dset))
+        print("Dset: ", dset)
+        print("Outputs:", list(outputs.values()))
+        assert False
         return False
     else:
         print('Dset succes!', len(outputs), 'states,', len(set(outputs)), 'unique outputs')
+        print('Dset size:', len(dset))
         return True
 
 
-def _get_dset_outputs(fsm, dset):
+def get_dset_outputs(fsm, dset):
     states = fsm.get_states()
     outputs = {}
     for state in states:
@@ -53,18 +59,20 @@ def _get_dset_outputs(fsm, dset):
 
 def get_distinguishing_set(fsm: MealyMachine, check=True):
     path = tempfile.mktemp(".gv")
+    print("TMP PATH: ", path)
 
     _render(fsm, path)
 
-    dset = _run_distset(path)
+    dset = set(_run_distset(path))
+    dset.remove(tuple())
 
     if check:
-        _check_distinguishing_set(fsm, dset)
+        check_distinguishing_set(fsm, dset)
 
     return dset
 
 
-def _run_distset(path_to_dot):
+def _run_distset(path_to_dot, return_mappings=False):
     cases = {
         "State": {},
         "Output": {},
@@ -73,7 +81,7 @@ def _run_distset(path_to_dot):
 
     suffixes = []
 
-    result = subprocess.run([distsetpath, '-path', path_to_dot], capture_output=True)
+    result = subprocess.run([distsetpath, '-path', path_to_dot, '-strategy', '0'], capture_output=True)
     for line in result.stdout.decode().split('\n'):
 
         if re.match("State|Output|Input .*", line):
@@ -89,4 +97,8 @@ def _run_distset(path_to_dot):
 
             suffixes.append(tuple(suffix))
 
-    return suffixes
+    if return_mappings:
+        return suffixes, cases
+    else:
+        return suffixes
+
