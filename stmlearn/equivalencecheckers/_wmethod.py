@@ -1,4 +1,4 @@
-from stmlearn.util.distinguishingset import get_distinguishing_set
+from stmlearn.util.partition import get_distinguishing_set
 from stmlearn.util import get_state_cover_set
 from stmlearn.equivalencecheckers import EquivalenceChecker
 from stmlearn.suls import SUL, DFA, MealyMachine, MealyState
@@ -41,20 +41,28 @@ class WmethodEquivalenceChecker(EquivalenceChecker):
         equivalent = True
         counterexample = None
 
-        order = sorted(range(1, depth + 1), reverse=self.longest_first)
+        order = sorted(range(1, depth + 2), reverse=self.longest_first)
 
 
         for i in order:
             print(i, '/', depth)
-            for p in P:
-                for x in product(X, repeat=i):
+            for x in product(X, repeat=i):
+                for p in P:
                     for w in W:
                         test_sequence = p + x + w
-                        print(test_sequence)
+                        #print(test_sequence)
                         equivalent, counterexample = self._are_equivalent(fsm, test_sequence)
-                        print("Test sequence: ", test_sequence)
+                        #print("Test sequence: ", test_sequence)
                         if not equivalent:
                             print("COUNTEREXAMPLE:", counterexample)
+                            fsm.reset()
+                            hyp_output = fsm.process_input(test_sequence)
+                            self.sul.reset()
+                            sul_output = self.sul.process_input(test_sequence)
+                            print("SUL OUTPUT:", sul_output)
+                            print("HYP OUTPUT:", hyp_output)
+                            if sul_output == hyp_output:
+                                print('WTF?!')
                             return equivalent, counterexample
 
         return equivalent, None
