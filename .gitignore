@@ -133,3 +133,5 @@ stmlearn.egg-info/
 build/
 dist/
 .idea/
+/tests/partition/rers_industrial_tests/
+/tests/partition/testcases/
