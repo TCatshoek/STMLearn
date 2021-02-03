@@ -7,6 +7,7 @@ from stmlearn.suls import SUL
 
 from graphviz import Digraph
 
+
 class DFAState:
     def __init__(self, name: str, edges=None):
         if edges is None:
@@ -29,6 +30,8 @@ class DFAState:
                 raise Exception(f'{action} already defined in state {self.name}')
 
     def next(self, action):
+        if action == 'λ':  # Empty string
+            return self, self.isAccepting
         if action in self.edges.keys():
             nextstate = self.edges.get(action)
             return nextstate, nextstate.isAccepting
@@ -54,10 +57,10 @@ class DFA(SUL):
     def __str__(self):
         states = self.get_states()
 
-        #Hacky backslash thing
+        # Hacky backslash thing
         tab = '\t'
         nl = '\n'
-        return f'[DFA: \n { nl.join([f"{tab}{str(state)}" for state in states]) } ' \
+        return f'[DFA: \n {nl.join([f"{tab}{str(state)}" for state in states])} ' \
                f'\n\n\t[Initial state: {self.initial_state.name}]' \
                f'\n\t[Accepting states: {[s.name for s in self.accepting_states]}]' \
                f'\n]'
@@ -95,7 +98,7 @@ class DFA(SUL):
         for input in inputs:
             try:
                 nextstate = self.state.next_state(input)
-                #print(f'({self.state.name}) ={input}=> ({nextstate.name})')
+                # print(f'({self.state.name}) ={input}=> ({nextstate.name})')
                 self.state = nextstate
             except Exception as e:
                 print(e)
