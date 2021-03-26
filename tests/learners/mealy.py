@@ -1,6 +1,6 @@
 import unittest
 
-from stmlearn.equivalencecheckers import WmethodEquivalenceChecker, BFEquivalenceChecker
+from stmlearn.equivalencecheckers import WmethodEquivalenceChecker, BFEquivalenceChecker, SmartWmethodEquivalenceChecker
 from stmlearn.learners import LStarMealyLearner, TTTMealyLearner
 from stmlearn.suls import MealyState, MealyMachine, DFAState, DFA
 from stmlearn.teachers import Teacher
@@ -69,12 +69,12 @@ class LearnIndustrialMealy(unittest.TestCase):
         # Load testcases
         self.m54 = load_mealy_dot("testcases/m54.dot")
         self.m164 = load_mealy_dot("testcases/m164.dot")
-        # self.m22 = load_mealy_dot("testcases/m22.dot")
-        # self.m182 = load_mealy_dot("testcases/m182.dot")
+        self.m22 = load_mealy_dot("testcases/m22.dot")
+        self.m182 = load_mealy_dot("testcases/m182.dot")
 
         self.systems = {
             'm54': self.m54,
-            #'m164': self.m164,
+            'm164': self.m164,
             # 'm22':  self.m22,      # too slow
             # 'm182': self.m182      # too slow
         }
@@ -98,7 +98,8 @@ class LearnIndustrialMealy(unittest.TestCase):
         for name, system in self.systems.items():
             n_states = len(system.get_states())
             sul = DictCache(system)
-            eqc = WmethodEquivalenceChecker(sul, m=n_states)
+            eqc = SmartWmethodEquivalenceChecker(sul, horizon=6, stop_on={"error"}, order_type='ce count')
+
             teacher = Teacher(sul, eqc)
             learner = TTTMealyLearner(teacher)
             hyp = learner.run()

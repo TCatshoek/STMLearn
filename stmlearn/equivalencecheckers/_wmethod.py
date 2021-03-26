@@ -30,7 +30,9 @@ class WmethodEquivalenceChecker(EquivalenceChecker):
 
         print('Attempting to determine distinguishing set')
         W = get_distinguishing_set(fsm)
-        if len(W) < 1:
+
+        # We shouldn't forget to check without distinguishing sequence, or we may miss some differences in some cases
+        if tuple() not in W:
             W.add(tuple())
 
         print('distinguishing:', W)
@@ -460,7 +462,12 @@ class SmartWmethodEquivalenceCheckerV4(EquivalenceChecker):
         print("Depth:", depth)
 
         print("[info] Calculating distinguishing set")
-        W = get_distinguishing_set(fsm, check=False)
+        W = get_distinguishing_set(fsm)
+        print("Dset: ", W)
+
+        # We shouldn't forget to check without distinguishing sequence, or we may miss some differences in some cases
+        if tuple() not in W:
+            W.add(tuple())
 
         P = get_state_cover_set(fsm)
         print("[info] Got state cover set")
@@ -476,7 +483,13 @@ class SmartWmethodEquivalenceCheckerV4(EquivalenceChecker):
         counterexample = None
 
         for access_sequence in self.acc_seq_order(P):
-            print("[info] Trying access sequence:", access_sequence)
+            # Get state name reached by acc seq
+            fsm.reset()
+            fsm.process_input(access_sequence)
+            _acc_seq_state_name = fsm.state.name
+            fsm.reset()
+
+            print("[info] Trying access sequence:", access_sequence, "State:", _acc_seq_state_name)
             to_visit = deque()
             to_visit.extend(A)
 

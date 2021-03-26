@@ -138,6 +138,25 @@ class LongSingleTestPartition(unittest.TestCase):
         dset = get_distinguishing_set(self.mm, method="Moore")
         self.assertEqual({('a',)}, dset)
 
+# Check if we always return at least one element in the distinguishing set
+class DFAAtLeastOnePartition(unittest.TestCase):
+    def setUp(self):
+        # Set up an example mealy machine
+        s1 = DFAState('1')
+        s1.add_edge('a', s1)
+        s1.add_edge('b', s1)
+        self.dfa = DFA(s1, [])
+
+    def test_at_least_one_hopcroft(self):
+        dset = get_distinguishing_set(self.dfa, method="Hopcroft")
+        self.assertTrue(check_distinguishing_set(self.dfa, dset))
+        self.assertEqual({tuple()}, dset)
+
+    def test_at_least_one_moore(self):
+        dset = get_distinguishing_set(self.dfa, method="Moore")
+        self.assertTrue(check_distinguishing_set(self.dfa, dset))
+        self.assertEqual({tuple()}, dset)
+
 
 class RersIndustrialTestPartition(unittest.TestCase):
     @classmethod

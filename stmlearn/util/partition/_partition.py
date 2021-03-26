@@ -333,8 +333,12 @@ def get_distinguishing_set(fsm: Union[MealyMachine, DFA], method="Hopcroft"):
     else:
         raise NotImplementedError
 
+    if len(tmp) < 1:
+        tmp.add(tuple())
+
     check_ok = check_distinguishing_set(fsm, tmp)
-    assert check_ok, "If this goes wrong your fsm is probably not minimal"
+    assert check_ok, "If this goes wrong your fsm is probably not minimal, e.g. two or more states show the same behavior"
+
     return tmp
 
 def _do_partition(fsm: Union[MealyMachine, DFA], alphabet, method):

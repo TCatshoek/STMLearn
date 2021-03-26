@@ -125,7 +125,7 @@ class TTTMealyLearner(TTTAbstractLearner):
         new_inner.add(response_q_new, q_new_leaf)
         new_inner.add(response_q_old, q_old_leaf)
 
-        print("splitty boi", q_old_state.name, q_new_state.name)
+        print("split:", q_old_state.name, q_new_state.name)
         #
         # if response_q_new == True:
         #     new_inner.addTrue(q_new_leaf)

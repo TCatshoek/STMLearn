@@ -1,10 +1,9 @@
 import tempfile
 
-from equivalencecheckers.bruteforce import BFEquivalenceChecker
-from equivalencecheckers.wmethod import WmethodEquivalenceChecker
-from learners.TTTmealylearner import TTTMealyLearner
-from suls.mealymachine import MealyState, MealyMachine
-from teachers.teacher import Teacher
+from stmlearn.equivalencecheckers import WmethodEquivalenceChecker
+from stmlearn.learners import TTTMealyLearner
+from stmlearn.suls import MealyState, MealyMachine
+from stmlearn.teachers import Teacher
 
 # Set up an example mealy machine
 s1 = MealyState('1')
