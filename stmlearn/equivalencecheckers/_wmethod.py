@@ -47,24 +47,12 @@ class WmethodEquivalenceChecker(EquivalenceChecker):
 
 
         for i in order:
-            print(i, '/', depth)
             for x in product(X, repeat=i):
                 for p in P:
                     for w in W:
                         test_sequence = p + x + w
-                        #print(test_sequence)
                         equivalent, counterexample = self._are_equivalent(fsm, test_sequence)
-                        #print("Test sequence: ", test_sequence)
                         if not equivalent:
-                            print("COUNTEREXAMPLE:", counterexample)
-                            fsm.reset()
-                            hyp_output = fsm.process_input(test_sequence)
-                            self.sul.reset()
-                            sul_output = self.sul.process_input(test_sequence)
-                            print("SUL OUTPUT:", sul_output)
-                            print("HYP OUTPUT:", hyp_output)
-                            if sul_output == hyp_output:
-                                print('WTF?!')
                             return equivalent, counterexample
 
         return equivalent, None
@@ -151,7 +139,7 @@ class SmartWmethodEquivalenceChecker(EquivalenceChecker):
         print("Depth:", depth)
 
         print("[info] Calculating distinguishing set")
-        W = get_distinguishing_set(fsm, check=False)
+        W = get_distinguishing_set(fsm)
 
         P = get_state_cover_set(fsm)
         print("[info] Got state cover set")

@@ -105,6 +105,7 @@ class LStarMealyLearner(Learner):
         for a in self.A:
             self.E.add(a)
 
+
         # Don't redo expensive computations unless necessary
         self._mem = {}
         self._watch = {}
@@ -233,8 +234,6 @@ class LStarMealyLearner(Learner):
         return is_consistent
 
     def print_observationtable(self):
-        # No
-        return
 
         rows = []
 
@@ -302,7 +301,7 @@ class LStarMealyLearner(Learner):
                     self.S.add(s + a)
                     #break
 
-        self.print_observationtable()
+
 
 
     # Builds the hypothesised dfa using the currently available information
@@ -343,13 +342,17 @@ class LStarMealyLearner(Learner):
 
         return MealyMachine(initial_state)
 
-    def run(self, show_intermediate=False, render_options=None, on_hypothesis: Callable[[MealyMachine], None] = None) -> MealyMachine:
-        self.print_observationtable()
-
+    def run(self, show_intermediate=False, print_observationtable=False, render_options=None, on_hypothesis: Callable[[MealyMachine], None] = None) -> MealyMachine:
         equivalent = False
+
+        if print_observationtable:
+            print("Initial observation table:")
+            self.print_observationtable()
 
         while not equivalent:
             while not (self._is_closed() and self._is_consistent()):
+                if print_observationtable:
+                    self.print_observationtable()
                 self.step()
 
             if self._save_checkpoints:
@@ -360,11 +363,11 @@ class LStarMealyLearner(Learner):
             print("HYPOTHESIS")
             print(hypothesis)
 
-            if on_hypothesis is not None:
-                on_hypothesis(hypothesis)
-
             if show_intermediate:
                 hypothesis.render_graph(render_options=render_options)
+
+            if on_hypothesis is not None:
+                on_hypothesis(hypothesis)
 
             equivalent, counterexample = self.teacher.equivalence_query(hypothesis)
 
