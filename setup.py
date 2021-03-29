@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="stmlearn",
-    version="0.0.2",
+    version="0.0.3",
     author="T. Catshoek",
     author_email="tomcatshoek@zeelandnet.nl",
     description="Python state machine learning library",
