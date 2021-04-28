@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from stmlearn.suls import SUL
 from typing import Tuple, Iterable, Callable, Optional
-from stmlearn.util import stats
-
+from stmlearn.util import Logger, Log
 class EquivalenceChecker(ABC):
     def __init__(self, sul):
         self.sul = sul
+        self.logger = Logger()
 
         # Noop init
         self._onCounterexample: Callable[[Iterable], None] = lambda x: None
@@ -29,7 +29,7 @@ class EquivalenceChecker(ABC):
         self.sul.reset()
         sul_output = self.sul.process_input(input)
 
-        stats.increment('test_query')
+        self.logger.increment(Log.TEST)
 
         if self._teacher is not None:
             self._teacher.test_query_counter += 1

@@ -3,14 +3,28 @@ from stmlearn.suls import SUL
 
 from typing import List, Optional, Iterable, Tuple, Callable
 
+def Sequential(*args, **kwargs):
+    def makeStacked(*inner_args, **kwargs):
+        return StackedChecker(*args, **kwargs)
+    return makeStacked
 
 class StackedChecker(EquivalenceChecker):
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         super().__init__(None)
         self.checkers: List[EquivalenceChecker] = []
 
+        self.sul = None
+
+        if 'sul' in kwargs:
+            self.sul = kwargs['sul']
+
         for arg in args:
-            self.checkers.append(arg)
+            if callable(arg):
+                if self.sul is None:
+                    raise Exception("Please specify SUL if you provide constructors to the stacked checker")
+                self.checkers.append(arg(sul=self.sul))
+            else:
+                self.checkers.append(arg)
 
     def set_teacher(self, teacher):
         self.teacher = teacher
@@ -19,7 +33,7 @@ class StackedChecker(EquivalenceChecker):
 
     def test_equivalence(self, test_sul: SUL) -> Tuple[bool, Optional[Iterable]]:
         for checker in self.checkers:
-            print('EQ check using', checker)
+            print('EQ check using', type(checker).__name__)
             equivalent, input = checker.test_equivalence(test_sul)
 
             if not equivalent:

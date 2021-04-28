@@ -1,5 +1,5 @@
 from stmlearn.util.partition import get_distinguishing_set
-from stmlearn.util import get_state_cover_set
+from stmlearn.util import get_state_cover_set, Log
 from stmlearn.equivalencecheckers import EquivalenceChecker
 from stmlearn.suls import SUL, DFA, MealyMachine, MealyState
 from stmlearn.util import stats
@@ -305,7 +305,7 @@ class SmartWmethodEquivalenceCheckerV2(EquivalenceChecker):
         hyp_output = fsm.process_input(input)
         self.sul.reset()
         sul_output = self.sul.process_input(input)
-        stats.increment('test_query')
+        self.logger.increment(Log.TEST)
 
         if self._teacher is not None:
             self._teacher.test_query_counter += 1

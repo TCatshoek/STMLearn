@@ -3,3 +3,4 @@ from ._notifier_set import NotifierSet
 from ._instrumentation import CounterexampleTracker
 from ._transitioncover import get_state_cover_set
 from ._mealygenerator import MakeRandomMealyMachine
+from ._logging import Logger, Log
