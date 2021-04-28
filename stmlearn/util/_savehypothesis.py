@@ -1,26 +1,23 @@
 from pathlib import Path
 from graphviz import Digraph
-from datetime import datetime
-from util.dotloader import load_mealy_dot, hyp_mealy_parser
+
 # Returns a handler function to save hypotheses in the given directory
-def savehypothesis(save_dir, save_prefix):
+def savehypothesis(save_dir):
     # Ensure save directory exists
     Path(save_dir).mkdir(parents=True, exist_ok=True)
 
-    # Add containing directory labeled with time
-    cur_dir_name = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-    cur_dir = Path(save_dir).joinpath(cur_dir_name)
-    cur_dir.mkdir()
+    cur_dir = save_dir
 
     def save(hyp):
+        print("SAVING STUFFF")
         # Count files so we can number ours
-        file_count = len(list(Path(cur_dir).glob("*.dot"))) + 1
+        file_count = len(list(Path(cur_dir).glob("*.dot")))
 
         # Gather states
         states = hyp.get_states()
         initial_state = hyp.initial_state
 
-        file_name = f'{save_prefix}_hyp_{file_count + 1}_{len(states)}s.dot'
+        file_name = f'hyp_{file_count + 1}_{len(states)}s.dot'
 
         g = Digraph('G', filename=Path(cur_dir).joinpath(file_name))
         g.attr(rankdir='LR')
@@ -42,10 +39,12 @@ def savehypothesis(save_dir, save_prefix):
 
     return save
 
-# Convenience function to also load the saved hypotheses back into mealy machines
-def loadhypothesis(path):
-    return load_mealy_dot(path, hyp_mealy_parser)
+
 
 if __name__ == "__main__":
+    from stmlearn.util.dotloader import load_mealy_dot, hyp_mealy_parser
+    # Convenience function to also load the saved hypotheses back into mealy machines
+    def loadhypothesis(path):
+        return load_mealy_dot(path, hyp_mealy_parser)
     loadhypothesis(
         '/home/tom/projects/lstar/experiments/learningfuzzing/hypotheses/Problem1/2020-08-01_15:03:32/Problem1_hyp_1_3s.dot')

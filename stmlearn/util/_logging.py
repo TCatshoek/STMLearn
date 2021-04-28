@@ -38,7 +38,7 @@ def _log_writer():
 
     # Write one last time
     logger.write()
-    print("Clean shutdown")
+
 
 
 class Logger(Borg):
@@ -77,6 +77,7 @@ class Logger(Borg):
             raise Exception("Log file exists")
 
         self.log_file = open(self.log_path, 'w')
+        self.write()
 
     def set_log_interval(self, log_interval):
         self.log_interval = log_interval
@@ -131,6 +132,7 @@ class Logger(Borg):
 def _on_quit():
     logger = Logger()
     logger.write()
+    print("Clean shutdown")
 atexit.register(_on_quit)
 
 if __name__ == "__main__":

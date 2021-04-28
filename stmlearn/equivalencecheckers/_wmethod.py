@@ -2,7 +2,6 @@ from stmlearn.util.partition import get_distinguishing_set
 from stmlearn.util import get_state_cover_set, Log
 from stmlearn.equivalencecheckers import EquivalenceChecker
 from stmlearn.suls import SUL, DFA, MealyMachine, MealyState
-from stmlearn.util import stats
 
 from typing import Union
 from itertools import product, chain

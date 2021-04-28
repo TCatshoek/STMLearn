@@ -1,6 +1,5 @@
 from stmlearn.learners import Learner
 from stmlearn.teachers import Teacher
-from stmlearn.util import stats
 import tempfile
 from collections import deque
 from graphviz import Digraph
