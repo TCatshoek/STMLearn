@@ -25,5 +25,7 @@ setuptools.setup(
         'tabulate',
         'graphviz',
         'pygtrie',
+        'pydot',
+        'networkx'
     ]
 )

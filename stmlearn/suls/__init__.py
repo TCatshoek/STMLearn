@@ -7,3 +7,6 @@ from ._mealy_machine import MealyMachine, MealyState
 
 # Convenience class for specifiying a DFA using a regex
 from ._re_machine import RegexMachine
+
+# Parser/SUL for .dot files describing mealy machines
+from ._mealydotsul import MealyDotSUL
