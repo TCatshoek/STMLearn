@@ -9,7 +9,6 @@ def savehypothesis(save_dir):
     cur_dir = save_dir
 
     def save(hyp):
-        print("SAVING STUFFF")
         # Count files so we can number ours
         file_count = len(list(Path(cur_dir).glob("*.dot")))
 
