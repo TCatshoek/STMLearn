@@ -1,4 +1,4 @@
-from stmlearn.equivalencecheckers import EquivalenceChecker
+from stmlearn.equivalencecheckers._equivalencechecker import EquivalenceChecker
 from stmlearn.suls import SUL
 
 from typing import List, Optional, Iterable, Tuple, Callable
