@@ -12,7 +12,7 @@ from collections import deque
 
 # Implements chow's W-method for equivalence checking
 class WmethodEquivalenceChecker(EquivalenceChecker):
-    def __init__(self, sul: SUL, m=5, longest_first=False):
+    def __init__(self, sul: SUL=None, m=5, longest_first=False):
         super().__init__(sul)
         self.m = m
         self.longest_first = longest_first
@@ -100,7 +100,7 @@ class WmethodHorizonEquivalenceChecker(EquivalenceChecker):
 
 # Wmethod EQ checker with early stopping
 class SmartWmethodEquivalenceChecker(EquivalenceChecker):
-    def __init__(self, sul: SUL, m=None, horizon=None, stop_on=set(), stop_on_startswith=set(), order_type='shortest first'):
+    def __init__(self, sul: SUL=None, m=None, horizon=None, stop_on=set(), stop_on_startswith=set(), order_type='shortest first'):
         super().__init__(sul)
         self.m = m
         self.horizon = horizon
@@ -411,7 +411,7 @@ class SmartWmethodEquivalenceCheckerV3(EquivalenceChecker):
 
 # Wmethod EQ checker with early stopping
 class SmartWmethodEquivalenceCheckerV4(EquivalenceChecker):
-    def __init__(self, sul: SUL, m=None, horizon=None, stop_on=set(), stop_on_startswith=set(), order_type='shortest first'):
+    def __init__(self, sul: SUL=None, m=None, horizon=None, stop_on=set(), stop_on_startswith=set(), order_type='shortest first'):
         super().__init__(sul)
         self.m = m
         self.horizon = horizon
