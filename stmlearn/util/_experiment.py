@@ -1,10 +1,14 @@
-from stmlearn.equivalencecheckers._stackedchecker import StackedChecker, Sequential
-from stmlearn.equivalencecheckers import EquivalenceChecker, WmethodEquivalenceChecker
+
 from pathlib import Path
 from stmlearn.util import Logger
 from datetime import datetime
-
 from stmlearn.util._savehypothesis import savehypothesis
+import sys
+import threading
+import _thread
+import os
+import signal
+import time
 
 
 class MATExperiment:
@@ -37,41 +41,13 @@ class MATExperiment:
         # Enable hypothesis logging
         self.run_kwargs['on_hypothesis'] = savehypothesis(log_dir.joinpath(f'hypotheses'))
 
+    def set_timeout(self, timeout):
+        def quit():
+            time.sleep(timeout)
+            print("Timeout reached")
+            os.kill(os.getpid(), signal.SIGUSR1)
 
-
-if __name__ == "__main__":
-    from stmlearn.learners import LStarMealyLearner
-    from stmlearn.suls import MealyState, MealyMachine
-    from stmlearn.teachers import Teacher
-
-    # Set up an example mealy machine
-    s1 = MealyState('1')
-    s2 = MealyState('2')
-    s3 = MealyState('3')
-
-    s1.add_edge('a', 'nice', s2)
-    s1.add_edge('b', 'B', s1)
-    s2.add_edge('a', 'nice', s3)
-    s2.add_edge('b', 'back', s1)
-    s3.add_edge('a', 'A', s3)
-    s3.add_edge('b', 'back', s1)
-
-    mm = MealyMachine(s1)
-
-    experiment = MATExperiment(
-        learner=LStarMealyLearner,
-        teacher=Teacher(
-            sul=mm,
-            eqc=Sequential(
-                WmethodEquivalenceChecker,
-                WmethodEquivalenceChecker,
-            )
-        )
-    )
-
-    experiment.enable_logging(
-        log_dir="logs",
-        name="test"
-    )
-
-    hyp = experiment.run()
+        # Set a custom signal handler in the main thread to handle a clean shutdown
+        signal.signal(signal.SIGUSR1, lambda a, b: sys.exit())
+        thr = threading.Thread(target=quit, daemon=True)
+        thr.start()
