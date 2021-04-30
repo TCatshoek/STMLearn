@@ -7,4 +7,5 @@ from ._wmethod import \
     SmartWmethodEquivalenceCheckerV4 as SmartWmethodEquivalenceChecker
 from ._bruteforce import BFEquivalenceChecker
 from ._randomwalk import RandomWalkEquivalenceChecker
+from ._stackedchecker import Sequential, StackedChecker
 
