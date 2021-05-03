@@ -4,6 +4,7 @@ import threading
 from enum import Enum, unique, auto
 import atexit
 
+
 @unique
 class Log(Enum):
     MEMBERSHIP = auto()
@@ -38,7 +39,6 @@ def _log_writer():
 
     # Write one last time
     logger.write()
-
 
 
 class Logger(Borg):
@@ -90,7 +90,9 @@ class Logger(Borg):
             return
 
         with self._lock:
-            self.log_file.write(f'{self._get_time()}, ')
+            logtime = self._get_time()
+            print("Writing", logtime)
+            self.log_file.write(f'{logtime}, ')
             values = [f'{k}:{v}' for k, v in self.data.items()]
             self.log_file.write(", ".join(values))
             self.log_file.write('\n')
@@ -128,27 +130,39 @@ class Logger(Borg):
             self.write()
 
 
+# Parses a log file into a pandas df compatible dict
+def parse_log(path):
+    with open(path, 'r') as file:
+        lines_read = 0
+        data = {'timestamp': []}
+        starttime = None
+        for line in file.readlines():
+            # Parse line
+            line_data = list(filter(lambda x: len(x) > 0, [x.strip() for x in line.split(',')]))
+            time, records = float(line_data[0]), line_data[1:]
+
+            # Time logging
+            if starttime is None:
+                starttime = time
+            data['timestamp'].append(time - starttime)
+
+            # Rest of the data
+            for record in records:
+                name, value = record.split(':')
+                if name not in data:
+                    data[name] = [0] * lines_read
+                data[name].append(value)
+
+            lines_read += 1
+
+        return data
+
+
 # Add a shutdown hook to write the logs one last time on exit
 def _on_quit():
     logger = Logger()
     logger.write()
     print("Clean shutdown")
+
+
 atexit.register(_on_quit)
-
-if __name__ == "__main__":
-    logger = Logger()
-
-    logger.set_log_path("log5.txt")
-    logger.set_log_interval(1)
-
-    logger.increment(Log.ERRORS)
-    logger.increment(Log.ERRORS)
-
-    time.sleep(2)
-
-    logger.increment(Log.ERRORS)
-    logger.increment(Log.ERRORS)
-
-    time.sleep(2)
-
-    print(logger.data)
