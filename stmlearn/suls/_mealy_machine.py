@@ -171,7 +171,7 @@ class MealyMachine(SUL):
                             and not (any([output.startswith(x) for x in ignore_edges])):
                         g.edge(cur_state.name, other_state.name, label=f'{action}/{output}')
 
-            if format != None:
+            if format is not None:
                 g.render(format=format, view=True)
             else:
                 g.save()

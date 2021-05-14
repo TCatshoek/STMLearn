@@ -84,7 +84,7 @@ class Population:
 
 
 class GeneticEquivalenceChecker(EquivalenceChecker):
-    def __init__(self, sul, counterexampletracker: CounterexampleTracker,
+    def __init__(self, sul=None, counterexampletracker: CounterexampleTracker=None,
                  pop_n=1000):
         super().__init__(sul)
         self.ct = counterexampletracker
@@ -136,6 +136,7 @@ class GeneticEquivalenceChecker(EquivalenceChecker):
         og_out_2 = test_sul.process_input(query)
         return og_out_1, og_out_2
 
+    # TODO: this is weird, should be replaced with a better method
     def minimize(self, counterexample, test_sul):
 
         og_out_1, og_out_2 = self._reset_and_query(counterexample, test_sul)

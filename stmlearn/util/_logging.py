@@ -163,6 +163,6 @@ def _on_quit():
     logger = Logger()
     logger.write()
     print("Clean shutdown")
-
+fi
 
 atexit.register(_on_quit)
