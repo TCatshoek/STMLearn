@@ -25,6 +25,12 @@ class StackedChecker(EquivalenceChecker):
                 self.checkers.append(arg(sul=self.sul))
             else:
                 self.checkers.append(arg)
+                if arg.sul is None:
+                    arg.sul = self.sul
+
+    # Gets the equivalence checkers in this stack by class name
+    def get_eqc(self, eqc_name):
+        return list(filter(lambda checker: eqc_name == type(checker).__name__, self.checkers))
 
     def set_teacher(self, teacher):
         self.teacher = teacher

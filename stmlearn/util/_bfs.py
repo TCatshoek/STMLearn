@@ -39,6 +39,7 @@ def bfs(fsm: Union[MealyMachine, DFA],
 
     while len(to_visit) > 0:
         cur_path, cur_state = to_visit.popleft()
+        visited.append(cur_state)
 
         # Call the hook
         if strategy is not None:

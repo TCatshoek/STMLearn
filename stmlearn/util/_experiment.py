@@ -1,8 +1,8 @@
 
 from pathlib import Path
-from stmlearn.util import Logger
-from datetime import datetime
+from stmlearn.util import Logger, CounterexampleTracker
 from stmlearn.util._savehypothesis import savehypothesis
+from datetime import datetime
 import sys
 import threading
 import _thread
@@ -17,11 +17,16 @@ class MATExperiment:
         self.learner = learner(self.teacher)
         self.logger = Logger()
         self.run_kwargs = {}
+        self.ct_tracker = None
 
     def run(self, *args, **kwargs):
         cur_kwargs = {**kwargs, **self.run_kwargs}
         hyp = self.learner.run(*args, **cur_kwargs)
         return hyp
+
+    def enable_ct_tracking(self):
+        self.ct_tracker = CounterexampleTracker()
+        self.teacher.eqc.onCounterexample(lambda ce: self.ct_tracker.add(ce))
 
     def enable_logging(self, log_dir, name, log_interval=60, write_on_change=None):
         # Enable logfile logging

@@ -7,6 +7,7 @@ from itertools import combinations
 from functools import reduce
 from typing import List
 from math import floor
+from stmlearn.util import Logger, Log, bfs
 
 class DTreeNode:
     def __init__(self, isLeaf, dTree, suffix=None, state=None, temporary=False, isRoot=False, id=None):
@@ -926,8 +927,8 @@ class TTTAbstractLearner(Learner, ABC):
         while not done:
             done, hyp = self.step()
 
-            # TODO: make stats counting work for DFA hypotheses
-            #stats.count_hypothesis_stats(hyp)
+            num_states = len(hyp.get_states())
+            Logger().set(Log.STATE_COUNT, num_states)
 
             if on_hypothesis is not None:
                 on_hypothesis(hyp)

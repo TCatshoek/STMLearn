@@ -126,7 +126,7 @@ class Logger(Borg):
             if old_value != value:
                 did_change = True
 
-        if did_change and self.write_on_change is not None and key in self.write_on_change:
+        if did_change and self.write_on_change is not None and key.name in self.write_on_change:
             self.write()
 
 
@@ -163,6 +163,6 @@ def _on_quit():
     logger = Logger()
     logger.write()
     print("Clean shutdown")
-fi
+
 
 atexit.register(_on_quit)

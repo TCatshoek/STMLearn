@@ -5,3 +5,4 @@ from ._transitioncover import get_state_cover_set
 from ._mealygenerator import MakeRandomMealyMachine
 from ._logging import Logger, Log, parse_log
 from ._experiment import MATExperiment
+from ._bfs import bfs, StateCoverStrategy, TransitionCoverStrategy, BFSStrategy

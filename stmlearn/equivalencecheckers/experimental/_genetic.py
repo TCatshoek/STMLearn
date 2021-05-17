@@ -84,10 +84,9 @@ class Population:
 
 
 class GeneticEquivalenceChecker(EquivalenceChecker):
-    def __init__(self, sul=None, counterexampletracker: CounterexampleTracker=None,
-                 pop_n=1000):
+    def __init__(self, sul=None, pop_n=1000):
         super().__init__(sul)
-        self.ct = counterexampletracker
+        self.ct = CounterexampleTracker()
         self.pop_n = pop_n
 
     def test_equivalence(self, test_sul: SUL) -> Tuple[bool, Iterable]:
