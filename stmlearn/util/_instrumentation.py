@@ -31,6 +31,9 @@ class CounterexampleTracker(Borg):
     def load(self, filename):
         with open(filename, 'rb') as file:
             self.storage = pickle.load(file)
+
+    def reset(self):
+        self.storage = []
     #
     # def distance_matrix(self, penalty=0):
     #     n = len(self.storage)

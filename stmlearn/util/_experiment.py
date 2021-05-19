@@ -26,6 +26,7 @@ class MATExperiment:
 
     def enable_ct_tracking(self):
         self.ct_tracker = CounterexampleTracker()
+        self.ct_tracker.reset()
         self.teacher.eqc.onCounterexample(lambda ce: self.ct_tracker.add(ce))
 
     def enable_logging(self, log_dir, name, log_interval=60, write_on_change=None):
@@ -39,6 +40,7 @@ class MATExperiment:
         log_dir.mkdir(exist_ok=True, parents=True)
         log_path = log_dir.joinpath("log.txt")
 
+        self.logger.reset()
         self.logger.set_log_path(log_path)
         self.logger.set_log_interval(log_interval)
         self.logger.set_write_on_change(write_on_change)

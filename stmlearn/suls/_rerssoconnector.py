@@ -1,5 +1,4 @@
-from suls.rersconnectorv4 import RERSConnectorV4
-from suls.sul import SUL
+from stmlearn.suls import SUL
 from subprocess import check_output
 import re
 
@@ -37,50 +36,8 @@ class RERSSOConnector(SUL):
 
     def get_alphabet(self):
         # Grep the source file for the line defining the input alphabet
-        tmp = check_output(["grep", "-o", "int inputs\[\] \= {\(.*\)};", f"{self.path_to_so.replace('.so', '')}.c"])
+        tmp = check_output(["grep", "-o", "int inputs\[\] \= {\(.*\)};", f"{str(self.path_to_so).replace('.so', '')}.c"])
         # Extract it and put it into a list
         return re.search('{(.*)}', tmp.decode()).group(1).split(',')
-
-
-if __name__ == "__main__":
-
-    n = 10000
-
-    #asyncio.run(main(n))
-
-    path = "/home/tom/projects/lstar/rers/TrainingSeqReachRers2019/Problem11/Problem11.so"
-    r = RERSSOConnector(path)
-    alphabet = r.get_alphabet()
-
-    path = "/home/tom/projects/lstar/rers/TrainingSeqReachRers2019/Problem11/Problem11"
-    r2 = RERSConnectorV4(path)
-
-    from numpy.random import choice
-    import time
-
-    inputs = []
-    for i in range(n):
-        inputs.append(list(choice(alphabet, 100)))
-
-    #inputs = [['9', '7', '7'], ['8', '9', '7', '7']]
-    start = time.perf_counter()
-
-    for input in inputs:
-        print("Sending", input)
-        r.reset()
-        result = r.process_input(input)
-
-        # result2 = r2.process_input(input)
-        # print()
-        # print('Result from SO:', result)
-        # print('Result from Connector:', result2)
-        # assert(result == result2)
-
-    end = time.perf_counter() - start
-    print(f'Took {end:0.5f} seconds')
-
-    print("DONE")
-
-
 
 

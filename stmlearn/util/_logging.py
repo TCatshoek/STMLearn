@@ -15,7 +15,6 @@ class Log(Enum):
     ERRORS = auto()
 
 
-# Singleton/BorgSingleton.py
 # Alex Martelli's 'Borg'
 class Borg:
     _shared_state = {}
@@ -69,6 +68,9 @@ class Logger(Borg):
 
     def _get_time(self):
         return time.time()
+
+    def reset(self):
+        self.data = {}
 
     def set_log_path(self, log_path):
         self.log_path = log_path
