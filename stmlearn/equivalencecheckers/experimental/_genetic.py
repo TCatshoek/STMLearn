@@ -117,7 +117,8 @@ class GeneticEquivalenceChecker(EquivalenceChecker):
                 #print(trace)
                 equivalent, input = self._are_equivalent(test_sul, trace)
                 if not equivalent:
-                    return False, self.minimize(input, test_sul)
+                    #return False, self.minimize(input, test_sul)
+                    return False, input
                     #total_counterexamples.append(input)
 
             # if len(new_counterexamples) < 1:
